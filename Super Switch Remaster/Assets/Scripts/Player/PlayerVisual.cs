@@ -5,10 +5,11 @@ using UnityEngine;
 public class PlayerVisual : MonoBehaviour
 {
     private const string DIRECTION_X = "DirectionX";
-    private const string JUMP = "Jump";
-    private const string FALLING = "Falling";
+    private const string IS_JUMP = "IsJumping";
+    private const string IS_SLIDING = "IsSliding";
+    private const string RUN_AND_JUMP = "RunNJump";
 
-    [SerializeField] private CheckGround ground;
+    [SerializeField] private CollisionDataRetriever collisionDataRetriever;
 
     private Animator animator;
 
@@ -21,21 +22,25 @@ public class PlayerVisual : MonoBehaviour
 
     private void Start()
     {
-        ground.OnGrounded += Ground_OnGrounded;
-        PlayerController.Instance.OnFalling += Player_OnFalling;
+        collisionDataRetriever.OnGrounded += CollisionDataRetriever_OnGrounded;
+        collisionDataRetriever.OnSliding += CollisionDataRetriever_OnSliding;
     }
 
-    private void Player_OnFalling(object sender, System.EventArgs e)
+    private void CollisionDataRetriever_OnSliding(object sender, System.EventArgs e)
     {
-        if (!ground.IsGrounded)
+        if (!collisionDataRetriever.OnGround)
         {
-            animator.SetTrigger(FALLING);
+            animator.SetBool(IS_SLIDING, collisionDataRetriever.OnWall);
+        }
+        else
+        {
+            animator.SetBool(IS_SLIDING, false);
         }
     }
 
-    private void Ground_OnGrounded(object sender, System.EventArgs e)
+    private void CollisionDataRetriever_OnGrounded(object sender, System.EventArgs e)
     {
-        animator.SetBool(JUMP, !ground.IsGrounded);
+        animator.SetBool(IS_JUMP, !collisionDataRetriever.OnGround);
     }
 
     public void SetInputVector(Vector2 direction)

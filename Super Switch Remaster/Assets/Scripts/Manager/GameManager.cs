@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
     {
         TogglePauseGame();
         Loader.Load(Loader.Scene.Main_Menu_Scene);
+        PlayerConfigurationManager.Instance.DestroyObject();
     }
 
 }

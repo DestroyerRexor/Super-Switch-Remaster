@@ -73,11 +73,6 @@ public class GameInput : MonoBehaviour
         playerController?.SetInteract(context);
     }
 
-    private void RetrieveJumpInput(InputAction.CallbackContext context)
-    {
-        playerController?.SetRetrieveJumpInput(context);
-    }
-
     private void OnDestroy()
     {
         if (playerConfig != null)
