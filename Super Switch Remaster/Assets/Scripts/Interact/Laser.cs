@@ -30,6 +30,10 @@ public class Laser : InteractObject
         IsActiveLaser();
 
     }
+    private void OnDestroy()
+    {
+        PlayerController.Instance.OnInteract -= PlayerController_OnInteract;
+    }
 
     private void PlayerController_OnInteract(object sender, System.EventArgs e)
     {
@@ -70,10 +74,8 @@ public class Laser : InteractObject
         }
     }
 
-    private IEnumerator UpdateLaserVisual()
+    private void UpdateLaserVisual()
     {
-        yield return new WaitForSeconds(0);
-
         isActive = !isActive;
 
         IsActiveLaser();
@@ -96,6 +98,6 @@ public class Laser : InteractObject
 
     public override void Interact()
     {
-        StartCoroutine(UpdateLaserVisual());
+        UpdateLaserVisual();
     }
 }

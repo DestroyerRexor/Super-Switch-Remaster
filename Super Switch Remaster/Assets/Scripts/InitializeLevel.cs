@@ -7,21 +7,36 @@ public class InitializeLevel : MonoBehaviour
     [SerializeField] private List<Transform> playerSpawns;
     [SerializeField] private GameObject playerPrefab;
 
-    private List<PlayerConfiguration> playerConfigs = new List<PlayerConfiguration>();
-
     private void Start()
+    {
+        if (FindObjectOfType<PlayerController>())
+        {
+            FindObjectOfType<PlayerController>().transform.position = playerSpawns[0].position;
+        }
+        else
+        {
+            GetPlayerConfig();
+        }
+
+    }
+
+    private void GetPlayerConfig()
     {
         if (PlayerConfigurationManager.Instance != null)
         {
-            playerConfigs = PlayerConfigurationManager.Instance.GetPlayerConfigs();
+            var player = Instantiate(playerPrefab, playerSpawns[0].position, Quaternion.identity);
+            player.GetComponentInChildren<GameInput>().InitializePlayer(PlayerConfigurationManager.Instance.GetPlayerConfig());
         }
-
-        for (int i = 0; i < playerConfigs.Count; i++)
+        else
         {
-            var player = Instantiate(playerPrefab, playerSpawns[i].position, Quaternion.identity, transform);
-            player.GetComponentInChildren<GameInput>().InitializePlayer(playerConfigs[i]);
+            StartCoroutine(RepeatGetPlayerConfig());
         }
+    }
 
+    IEnumerator RepeatGetPlayerConfig()
+    {
+        yield return new WaitForSeconds(1);
+        GetPlayerConfig();
     }
 
 }

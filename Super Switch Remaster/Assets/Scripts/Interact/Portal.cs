@@ -12,7 +12,10 @@ public class Portal : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             if (scene == Loader.Scene.Main_Menu_Scene)
+            {
+                Destroy(PlayerController.Instance.gameObject);
                 PlayerConfigurationManager.Instance.DestroyObject();
+            }
             Loader.Load(scene);
         }
     }

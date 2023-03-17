@@ -7,7 +7,6 @@ public class PlayerVisual : MonoBehaviour
     private const string DIRECTION_X = "DirectionX";
     private const string IS_JUMP = "IsJumping";
     private const string IS_SLIDING = "IsSliding";
-    private const string RUN_AND_JUMP = "RunNJump";
 
     [SerializeField] private CollisionDataRetriever collisionDataRetriever;
 
@@ -22,11 +21,30 @@ public class PlayerVisual : MonoBehaviour
 
     private void Start()
     {
-        collisionDataRetriever.OnGrounded += CollisionDataRetriever_OnGrounded;
-        collisionDataRetriever.OnSliding += CollisionDataRetriever_OnSliding;
+        collisionDataRetriever.OnGrounded += CollisionDataRetriever_onGrounded;
+        collisionDataRetriever.OnSliding += CollisionDataRetriever_onSliding;
+
+        GameManager.Instance.OnSceneChanged += GameManager_onSceneChanged;
     }
 
-    private void CollisionDataRetriever_OnSliding(object sender, System.EventArgs e)
+    private void OnDestroy()
+    {
+        collisionDataRetriever.OnGrounded -= CollisionDataRetriever_onGrounded;
+        collisionDataRetriever.OnSliding -= CollisionDataRetriever_onSliding;
+
+        GameManager.Instance.OnSceneChanged -= GameManager_onSceneChanged;
+    }
+
+    private void GameManager_onSceneChanged(object sender, System.EventArgs e)
+    {
+        if (animator != null)
+        {
+            animator.SetBool(IS_SLIDING, false);
+            animator.SetFloat(DIRECTION_X, 0);
+        }
+    }
+
+    private void CollisionDataRetriever_onSliding(object sender, System.EventArgs e)
     {
         if (!collisionDataRetriever.OnGround)
         {
@@ -38,7 +56,7 @@ public class PlayerVisual : MonoBehaviour
         }
     }
 
-    private void CollisionDataRetriever_OnGrounded(object sender, System.EventArgs e)
+    private void CollisionDataRetriever_onGrounded(object sender, System.EventArgs e)
     {
         animator.SetBool(IS_JUMP, !collisionDataRetriever.OnGround);
     }

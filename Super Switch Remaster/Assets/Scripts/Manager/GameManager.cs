@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -16,6 +17,7 @@ public class GameManager : MonoBehaviour
 
     public event EventHandler OnGamePaused;
     public event EventHandler OnGameUnPaused;
+    public event EventHandler OnSceneChanged;
 
     private bool isGamePaused = false;
 
@@ -28,6 +30,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
+
         resumeButton.onClick.AddListener(() =>
         {
             TogglePauseGame();
@@ -42,6 +46,11 @@ public class GameManager : MonoBehaviour
         {
             GoToMainMenuScene();
         });
+    }
+
+    private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
+    {
+        OnSceneChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnDestroy()
@@ -116,6 +125,7 @@ public class GameManager : MonoBehaviour
         TogglePauseGame();
         Loader.Load(Loader.Scene.Main_Menu_Scene);
         PlayerConfigurationManager.Instance.DestroyObject();
+        Destroy(PlayerController.Instance.gameObject);
     }
 
 }

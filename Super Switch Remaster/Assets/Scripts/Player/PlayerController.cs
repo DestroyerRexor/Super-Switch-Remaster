@@ -31,7 +31,7 @@ public class PlayerController : MonoBehaviour
     [Header("Wall Jump")]
     [SerializeField] private Vector2 wallJumpClimb = new Vector2(4f, 12f);
     [SerializeField] private Vector2 wallJumpBounce = new Vector2(10.7f, 10f);
-    [SerializeField] private Vector2 wallJumpLeap  = new Vector2(14f, 12f);
+    [SerializeField] private Vector2 wallJumpLeap = new Vector2(14f, 12f);
 
     [Header("Booleans")]
     private bool canMove;
@@ -64,7 +64,15 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance != null)
+        {
+            Debug.Log("PLAYER CONTROLLER SINGLETON - Trying to create another instance of singleton!!");
+        }
+        else
+        {
+            DontDestroyOnLoad(gameObject);
+            Instance = this;
+        }
 
         defaultGravityScale = 1.5f;
 
@@ -322,9 +330,17 @@ public class PlayerController : MonoBehaviour
 
     public void SetInteract(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if (context.performed && true)
-        {
-            OnInteract?.Invoke(this, EventArgs.Empty);
-        }
+        context.action.started += OnInteract_started;
+        context.action.canceled += OnInteract_canceled;
+    }
+
+    private void OnInteract_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnInteract?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnInteract_started(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnInteract?.Invoke(this, EventArgs.Empty);
     }
 }

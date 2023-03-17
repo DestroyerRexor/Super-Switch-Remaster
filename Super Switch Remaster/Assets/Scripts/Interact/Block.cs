@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[SelectionBase]
 public class Block : InteractObject
 {
-    [SerializeField] private GameObject blockVisual;
-    [SerializeField] private bool isActive = true;
+    [SerializeField] private SpriteRenderer blockVisual;
+    [SerializeField] private bool isActive;
     [SerializeField] private bool canBeManipulate = true;
 
     private void Start()
@@ -16,7 +17,11 @@ public class Block : InteractObject
         }
 
         IsActiveBlock();
+    }
 
+    private void OnDestroy()
+    {
+        PlayerController.Instance.OnInteract -= PlayerController_OnInteract;
     }
 
     private void PlayerController_OnInteract(object sender, System.EventArgs e)
@@ -24,10 +29,8 @@ public class Block : InteractObject
         Interact();
     }
 
-    private IEnumerator UpdateBlockVisual()
+    private void UpdateBlockVisual()
     {
-        yield return new WaitForSeconds(0);
-
         isActive = !isActive;
 
         IsActiveBlock();
@@ -47,17 +50,19 @@ public class Block : InteractObject
 
     private void Show()
     {
-        blockVisual.SetActive(true);
+        blockVisual.color = new Color(blockVisual.color.r, blockVisual.color.g, blockVisual.color.b, 1f);
+        blockVisual.GetComponent<Collider2D>().isTrigger = false;
     }
 
     private void Hide()
     {
-        blockVisual.SetActive(false);
+        blockVisual.color = new Color(blockVisual.color.r, blockVisual.color.g, blockVisual.color.b, 0.5f);
+        blockVisual.GetComponent<Collider2D>().isTrigger = true;
     }
 
     public override void Interact()
     {
-        StartCoroutine(UpdateBlockVisual());
+        UpdateBlockVisual();
     }
 
 }
