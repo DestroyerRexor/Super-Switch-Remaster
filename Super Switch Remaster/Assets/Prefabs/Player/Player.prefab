@@ -65,7 +65,7 @@ MonoBehaviour:
   maxAcceleration: 80
   maxAirAcceleration: 80
   jumpHeight: 15
-  maxAirJumps: 1
+  maxAirJumps: 0
   downwardMovementMultiplier: 7.4
   upwardMovementMultiplier: 4.16
   coyoteTime: 0.2
