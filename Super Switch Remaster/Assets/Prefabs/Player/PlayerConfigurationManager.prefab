@@ -110,6 +110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e21e18e0f503d140939094e1e8c9b69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerConfig: {fileID: 11400000, guid: efae4155a43dc98408c2d8d13111630d, type: 2}
 --- !u!1001 &2133435903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -164,6 +165,10 @@ PrefabInstance:
     - target: {fileID: 8653844350828301307, guid: 49ea2522ac42d0c418eec76da50ded55, type: 3}
       propertyPath: m_Name
       value: PlayerConfiguration
+      objectReference: {fileID: 0}
+    - target: {fileID: 8653844350828301307, guid: 49ea2522ac42d0c418eec76da50ded55, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49ea2522ac42d0c418eec76da50ded55, type: 3}

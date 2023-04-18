@@ -461,6 +461,90 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Character_17
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1ed40e27d211b642901c47c60ae524b
+      internalID: -54616396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Character_18
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20d98b88a6c42ee47a9fc454f8cc3d46
+      internalID: -800163036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Character_19
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7562ef5199575e94b99fd54c4bb0a3bc
+      internalID: 1214609961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Character_20
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aee042cb403e5914883e07e369263f3a
+      internalID: -525590408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -472,23 +556,27 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Character_5: 1535517188
-      Character_15: -184670065
-      Character_7: 1800437222
-      Character_10: -1224709974
-      Character_1: 313615535
-      Character_6: -563961510
-      Character_12: 1517147269
-      Character_8: 1721092732
-      Character_3: 2102645672
-      Character_14: -1242210822
-      Character_13: 847444739
-      Character_0: 1234548136
-      Character_16: 578553875
-      Character_9: -917505252
-      Character_2: -1830265708
-      Character_11: 1610688642
-      Character_4: -1049818323
+      Character_5: 1234548136
+      Character_15: 313615535
+      Character_17: 1820710747
+      Character_7: -1830265708
+      Character_10: 2102645672
+      Character_1: -1049818323
+      Character_6: 1535517188
+      Character_12: -563961510
+      Character_8: 1800437222
+      Character_3: 1721092732
+      Character_14: -917505252
+      Character_13: -1224709974
+      Character_0: 1610688642
+      Character_16: 1517147269
+      Character_9: 847444739
+      Character_2: -1242210822
+      Character_20: 715269615
+      Character_18: 489399137
+      Character_11: -184670065
+      Character_4: 578553875
+      Character_19: -1264809314
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

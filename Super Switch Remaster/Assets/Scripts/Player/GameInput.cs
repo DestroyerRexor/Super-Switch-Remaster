@@ -25,7 +25,7 @@ public class GameInput : MonoBehaviour
     public void InitializePlayer(PlayerConfiguration pc)
     {
         playerConfig = pc;
-        playerConfig.Input.onActionTriggered += Input_onActionTriggered;
+        playerConfig.input.onActionTriggered += Input_onActionTriggered;
     }
 
     private void Input_onActionTriggered(InputAction.CallbackContext obj)
@@ -73,16 +73,11 @@ public class GameInput : MonoBehaviour
         playerController?.SetInteract(context);
     }
 
-    private void RetrieveJumpInput(InputAction.CallbackContext context)
-    {
-        playerController?.SetRetrieveJumpInput(context);
-    }
-
     private void OnDestroy()
     {
         if (playerConfig != null)
         {
-            playerConfig.Input.onActionTriggered -= Input_onActionTriggered;
+            playerConfig.input.onActionTriggered -= Input_onActionTriggered;
         }
 
         playerInputActions.Dispose();

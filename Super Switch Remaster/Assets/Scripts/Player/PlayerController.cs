@@ -10,7 +10,6 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance { get; private set; }
 
     public event EventHandler OnInteract;
-    public event EventHandler OnFalling;
 
     [Header("Move Settings")]
     [SerializeField, Range(0f, 100f)] private float maxSpeed = 4.5f;
@@ -25,12 +24,23 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Range(0, 0.3f)] private float coyoteTime = 0.2f;
     [SerializeField, Range(0, 0.3f)] private float jumpBufferTime = 0.2f;
 
+    [Header("Wall Slide")]
+    [SerializeField, Range(0.1f, 5f)] private float wallSlideMaxSpeed = 2f;
+    [SerializeField, Range(0.05f, 0.5f)] private float wallStickTime = 0.25f;
+
+    [Header("Wall Jump")]
+    [SerializeField] private Vector2 wallJumpClimb = new Vector2(4f, 12f);
+    [SerializeField] private Vector2 wallJumpBounce = new Vector2(10.7f, 10f);
+    [SerializeField] private Vector2 wallJumpLeap = new Vector2(14f, 12f);
+
     [Header("Booleans")]
     private bool canMove;
     private bool canJump;
     private bool canRotate = true;
     private bool isJumping;
     private bool retrieveJumpInput;
+    private bool onWall;
+    private bool wallJumping;
 
     private Vector2 desiredVelocity;
     private Vector2 velocity;
@@ -44,18 +54,25 @@ public class PlayerController : MonoBehaviour
     private float defaultGravityScale;
     private float coyoteCounter;
     private float jumpBufferCounter;
+    private float wallStickCounter;
+    private float wallDirectionX;
 
     [Header("Components")]
     [SerializeField] private Rigidbody2D rb;
-    [SerializeField] private CheckGround ground;
+    [SerializeField] private CollisionDataRetriever collisionDataRetriever;
 
-    [Header("Friction")]
-    private float friction;
-    private PhysicsMaterial2D material;
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance != null)
+        {
+            Debug.Log("PLAYER CONTROLLER SINGLETON - Trying to create another instance of singleton!!");
+        }
+        else
+        {
+            DontDestroyOnLoad(gameObject);
+            Instance = this;
+        }
 
         defaultGravityScale = 1.5f;
 
@@ -70,10 +87,78 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        #region Controlar caida y fases de salto
-        velocity = rb.velocity;
 
-        if (ground.IsGrounded && (rb.velocity.y > -0.01f && rb.velocity.y < 0.01f))
+        velocity = rb.velocity;
+        onWall = collisionDataRetriever.OnWall;
+        wallDirectionX = collisionDataRetriever.ContactNormal.x;
+
+        #region Wall Stick
+
+        if (collisionDataRetriever.OnWall && !collisionDataRetriever.OnGround && !wallJumping)
+        {
+            if (wallStickCounter > 0)
+            {
+                velocity.x = 0;
+                if (input.x == collisionDataRetriever.ContactNormal.x)
+                {
+                    wallStickCounter -= Time.deltaTime;
+                }
+                else
+                {
+                    wallStickCounter = wallStickTime;
+                }
+            }
+            else
+            {
+                wallStickCounter = wallStickTime;
+            }
+        }
+
+        #endregion
+
+        #region Wall Slide
+
+        if (onWall)
+        {
+            if (velocity.y < -wallSlideMaxSpeed)
+            {
+                velocity.y = -wallSlideMaxSpeed;
+            }
+        }
+        #endregion
+
+        #region Wall Jump
+
+        if ((onWall && velocity.x == 0) || collisionDataRetriever.OnGround)
+        {
+            wallJumping = false;
+        }
+
+        if (desiredJump)
+        {
+            if (-wallDirectionX == input.x)
+            {
+                velocity = new Vector2(wallJumpClimb.x * wallDirectionX, wallJumpClimb.y);
+                wallJumping = true;
+                desiredJump = false;
+            }
+            else if (input.x == 0)
+            {
+                velocity = new Vector2(wallJumpBounce.x * wallDirectionX, wallJumpBounce.y);
+                wallJumping = true;
+                desiredJump = false;
+            }
+            else
+            {
+                velocity = new Vector2(wallJumpLeap.x * wallDirectionX, wallJumpLeap.y);
+                wallJumping = true;
+                desiredJump = false;
+            }
+        }
+        #endregion
+
+        #region Controlar caida y fases de salto
+        if (collisionDataRetriever.OnGround && (rb.velocity.y > -0.01f && rb.velocity.y < 0.01f))
         {
             jumpPhase = 0;
             coyoteCounter = coyoteTime;
@@ -107,18 +192,16 @@ public class PlayerController : MonoBehaviour
         else if (rb.velocity.y < 0)
         {
             rb.gravityScale = downwardMovementMultiplier;
-            OnFalling?.Invoke(this, EventArgs.Empty);
         }
         else
         {
             rb.gravityScale = defaultGravityScale;
         }
-
-        rb.velocity = velocity;
         #endregion
 
-        HandleMovement();
+        rb.velocity = velocity;
 
+        HandleMovement();
     }
 
     private void HandleMovement()
@@ -127,7 +210,7 @@ public class PlayerController : MonoBehaviour
         {
             if (input.x > 0.3f)
             {
-                acceleration = ground.IsGrounded ? maxAcceleration : maxAirAcceleration;
+                acceleration = collisionDataRetriever.OnGround ? maxAcceleration : maxAirAcceleration;
                 maxSpeedChange = acceleration * Time.deltaTime;
                 velocity.x = Mathf.MoveTowards(velocity.x, desiredVelocity.x, maxSpeedChange);
 
@@ -139,13 +222,13 @@ public class PlayerController : MonoBehaviour
                 }
 
 
-                if (!ground.IsGrounded)
+                if (!collisionDataRetriever.OnGround)
                     return;
 
             }
             else if (input.x < -0.3f)
             {
-                acceleration = ground.IsGrounded ? maxAcceleration : maxAirAcceleration;
+                acceleration = collisionDataRetriever.OnGround ? maxAcceleration : maxAirAcceleration;
                 maxSpeedChange = acceleration * Time.deltaTime;
                 velocity.x = Mathf.MoveTowards(velocity.x, desiredVelocity.x, maxSpeedChange);
 
@@ -155,7 +238,7 @@ public class PlayerController : MonoBehaviour
                     transform.rotation = input.x < -0.3f ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
                 }
 
-                if (!ground.IsGrounded)
+                if (!collisionDataRetriever.OnGround)
                     return;
 
             }
@@ -186,70 +269,36 @@ public class PlayerController : MonoBehaviour
             {
                 jumpSpeed = Mathf.Max(jumpSpeed - velocity.y, 0f);
             }
+            else if (velocity.y < 0f)
+            {
+                jumpSpeed += Mathf.Abs(rb.velocity.y);
+            }
+
             velocity.y += jumpSpeed;
 
             rb.velocity = velocity;
-
         }
     }
 
     private void HandleInput()
     {
-        desiredVelocity = new Vector2(input.x, 0f) * Mathf.Max(maxSpeed - GetFriction(), 0f);
+        desiredVelocity = new Vector2(input.x, 0f) * Mathf.Max(maxSpeed - collisionDataRetriever.GetFriction(), 0f);
 
-        desiredJump |= retrieveJumpInput;
+        if (onWall && !collisionDataRetriever.OnGround)
+        {
+            desiredJump |= retrieveJumpInput;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        RetrieveFriction(collision);
-    }
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        RetrieveFriction(collision);
-    }
-    private void OnCollisionExit2D()
-    {
-        friction = 0;
-    }
+        collisionDataRetriever.EvaluateCollision(collision);
 
-    private void RetrieveFriction(Collision2D collision)
-    {
-        if (collision.rigidbody.sharedMaterial != null)
+        if (collisionDataRetriever.OnWall && !collisionDataRetriever.OnGround && wallJumping)
         {
-            material = collision.rigidbody.sharedMaterial;
-
-            friction = 0;
-
-            if (material != null)
-            {
-                friction = material.friction;
-            }
-        }
-    }
-
-    private float GetFriction() { return friction; }
-
-    public void ChangeGravity()
-    {
-        var defaultDownwardMultiplier = 7.4f;
-
-        StartCoroutine(ReturnGravity(defaultDownwardMultiplier));
-    }
-
-    IEnumerator ReturnGravity(float defaultMultiplier)
-    {
-        var timeElapsed = 0f;
-        var lerpDuration = 0.75f;
-        while (timeElapsed < lerpDuration)
-        {
-            downwardMovementMultiplier = Mathf.Lerp(0, defaultMultiplier, timeElapsed / lerpDuration);
-            timeElapsed += Time.deltaTime;
-
-            yield return null;
+            rb.velocity = Vector2.zero;
         }
 
-        downwardMovementMultiplier = defaultMultiplier;
     }
 
     public void SetInputVector(Vector2 direction)
@@ -261,24 +310,37 @@ public class PlayerController : MonoBehaviour
     {
         if (context.performed && canJump)
         {
+            context.action.started += Action_started;
+            context.action.canceled += Action_canceled;
+
             Jump();
+
         }
+    }
+
+    private void Action_started(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        retrieveJumpInput = true;
+    }
+
+    private void Action_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        retrieveJumpInput = false;
     }
 
     public void SetInteract(UnityEngine.InputSystem.InputAction.CallbackContext context)
     {
-        if (context.performed && true)
-        {
-            OnInteract?.Invoke(this, EventArgs.Empty);
-        }
+        context.action.started += OnInteract_started;
+        context.action.canceled += OnInteract_canceled;
     }
 
-    public void SetRetrieveJumpInput(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    private void OnInteract_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        if (context.performed && canJump)
-        {
-            retrieveJumpInput = context.action.triggered;
-        }
+        OnInteract?.Invoke(this, EventArgs.Empty);
     }
 
+    private void OnInteract_started(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        OnInteract?.Invoke(this, EventArgs.Empty);
+    }
 }

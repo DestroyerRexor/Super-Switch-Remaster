@@ -5,10 +5,10 @@ using UnityEngine;
 public class PlayerVisual : MonoBehaviour
 {
     private const string DIRECTION_X = "DirectionX";
-    private const string JUMP = "Jump";
-    private const string FALLING = "Falling";
+    private const string IS_JUMP = "IsJumping";
+    private const string IS_SLIDING = "IsSliding";
 
-    [SerializeField] private CheckGround ground;
+    [SerializeField] private CollisionDataRetriever collisionDataRetriever;
 
     private Animator animator;
 
@@ -21,21 +21,44 @@ public class PlayerVisual : MonoBehaviour
 
     private void Start()
     {
-        ground.OnGrounded += Ground_OnGrounded;
-        PlayerController.Instance.OnFalling += Player_OnFalling;
+        collisionDataRetriever.OnGrounded += CollisionDataRetriever_onGrounded;
+        collisionDataRetriever.OnSliding += CollisionDataRetriever_onSliding;
+
+        GameManager.Instance.OnSceneChanged += GameManager_onSceneChanged;
     }
 
-    private void Player_OnFalling(object sender, System.EventArgs e)
+    private void OnDestroy()
     {
-        if (!ground.IsGrounded)
+        collisionDataRetriever.OnGrounded -= CollisionDataRetriever_onGrounded;
+        collisionDataRetriever.OnSliding -= CollisionDataRetriever_onSliding;
+
+        GameManager.Instance.OnSceneChanged -= GameManager_onSceneChanged;
+    }
+
+    private void GameManager_onSceneChanged(object sender, System.EventArgs e)
+    {
+        if (animator != null)
         {
-            animator.SetTrigger(FALLING);
+            animator.SetBool(IS_SLIDING, false);
+            animator.SetFloat(DIRECTION_X, 0);
         }
     }
 
-    private void Ground_OnGrounded(object sender, System.EventArgs e)
+    private void CollisionDataRetriever_onSliding(object sender, System.EventArgs e)
     {
-        animator.SetBool(JUMP, !ground.IsGrounded);
+        if (!collisionDataRetriever.OnGround)
+        {
+            animator.SetBool(IS_SLIDING, collisionDataRetriever.OnWall);
+        }
+        else
+        {
+            animator.SetBool(IS_SLIDING, false);
+        }
+    }
+
+    private void CollisionDataRetriever_onGrounded(object sender, System.EventArgs e)
+    {
+        animator.SetBool(IS_JUMP, !collisionDataRetriever.OnGround);
     }
 
     public void SetInputVector(Vector2 direction)

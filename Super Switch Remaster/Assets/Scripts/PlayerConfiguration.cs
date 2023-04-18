@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerConfiguration
+[CreateAssetMenu(fileName = "Player Configuration")]
+public class PlayerConfiguration : ScriptableObject
 {
+    public PlayerInput input;
+    public int playerIndex;
+
     public PlayerConfiguration(PlayerInput pi)
     {
-        PlayerIndex = pi.playerIndex;
-        Input = pi;
+        playerIndex = pi.playerIndex;
+        input = pi;
     }
 
-    public PlayerInput Input { get; set; }
-    public int PlayerIndex { get; set; }
-    public bool IsReady { get; set; }
 }
